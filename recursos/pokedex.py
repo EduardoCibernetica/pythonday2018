@@ -5,16 +5,15 @@ class Pokedex(Resource):
                {'id':2, 'id_nacional': 65, 'pokemon': 'Alakazam', 'tipo': 'psíquico', 'generación': 'Primera'},
                {'id':3, 'id_nacional': 376, 'pokemon': 'Metagross', 'tipo': 'Acero', 'generación': 'Tercera'},
               ]
-    # {'id':5, 'id_nacional': 25, 'pokemon': 'Pikachu', 'tipo': 'eléctrico', 'generación': 'Tercera'},
-    def get(self, id=1):
-        id = int(id)
-        if id == -1:
+    def get(self, id_nacional=None):
+        if id_nacional == None:
             return self.wikidex, 200
-        elif id != -1 and id >= 1:
+        elif id_nacional != None and id_nacional >= 1:
             for data in self.wikidex:
-                if data['id'] == id:
+                if data['id_nacional'] == id_nacional:
                     return data, 200
-            return {'mensaje': 'No se encontraron resultados'}, 200
+            return {'mensaje':
+                    'No tenemos información del pokemon {} en nuestra wikidex'.format(id_nacional)}, 200
 
     def post(self):
         parser = reqparse.RequestParser()
@@ -26,10 +25,9 @@ class Pokedex(Resource):
         identificador = len(self.wikidex)
         args['id'] = identificador + 1
         self.wikidex.append(args)
-        return {'mensaje': 'ok'}, 200
+        return {'mensaje': 'El pokemon {} fue añadido a la wikidex'.format(args['pokemon'])}, 200
 
-    def put(self, id=-1):
-        id = int(id)
+    def put(self, id_nacional=None):
         parser = reqparse.RequestParser()
         parser.add_argument('id_nacional', type=int, required=True)
         parser.add_argument('pokemon', type=str, required=True)
@@ -37,25 +35,23 @@ class Pokedex(Resource):
         parser.add_argument('generación', type=str, required=True)
         args = parser.parse_args()
 
-        if id != -1 and id >= 1:
+        if id_nacional != None and id_nacional >= 1:
             for data in self.wikidex:
-                if data['id'] == id:
-                    data['id_nacional'] = args['id_nacional']
-                    data['pokemon'] = args['pokemon']
-                    data['tipo'] = args['tipo']
-                    data['generación'] = args['generación']
-                    return {'mensaje': 'Elemento editado'}, 200
+                if data['id_nacional'] == id_nacional:
+                   data['pokemon'] = args['pokemon']
+                   data['tipo'] = args['tipo']
+                   data['generación'] = args['generación']
+                   return {'mensaje': 'El pokemon {} fue editado'.format(data['pokemon'])}, 200
             return {'mensaje': 'No se encontro el pokemon'}, 200
-        return {'mensaje': 'Falta introducir una id correcta'}, 200
+        return {'mensaje': 'Falta introducir una id_nacional correcta'}, 200
 
-    def delete(self, id=-1):
-        id = int(id)
-        if id != -1 and id >= 1:
+    def delete(self, id_nacional=None):
+        if id_nacional != None and id_nacional >= 1:
             indice = 0
             for data in self.wikidex:
-                if data['id'] == id:
+                if data['id_nacional'] == id_nacional:
                     self.wikidex.pop(indice)
-                    return {'mensaje': 'Elemento eliminado'}, 200
+                    return {'mensaje': 'El pokemon {} fue eliminado'.format(data['pokemon'])}, 200
                 indice = indice + 1
-            return {'mensaje': 'No se encontro el pokemon'}, 200
-        return {'mensaje': 'Falta introducir una id correcta'}, 200
+            return {'mensaje': 'No tenemos informaión en nuestra Wikidex'}, 200
+        return {'mensaje': 'Falta introducir una id_nacional valido'}, 200
